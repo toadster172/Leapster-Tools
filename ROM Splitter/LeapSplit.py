@@ -288,8 +288,8 @@ def parseChorusRIBTable(file): #The ROM info starts here.
             deviceStartAddress = struct.unpack("<I", rom.read(4))[0] #Use this as the ROM base offset (where in memory the ROM is mapped to)
             deviceEndAddress = struct.unpack("<I", rom.read(4))[0]
             pFullChecksum = struct.unpack("<I", rom.read(4))[0]
-            pSparseChecksum = struct.unpack("<I", rom.read(4))[0]
-            pBootSafeFcnTable = struct.unpack("<I", rom.read(4))[0] #Always zero? No idea what this actually does...
+            pSparseChecksum = struct.unpack("<I", rom.read(4))[0] #Result of adding 32-bit word every 3988 bytes from device start to device end. Checked by BIOS
+            pBootSafeFcnTable = struct.unpack("<I", rom.read(4))[0] #In the BIOS ROM, contains pointers to functions to read RIBs before MPIs are initialized
             reserved0 = rom.read(4)
             reserved1 = rom.read(4)
             reserved2 = rom.read(4)
@@ -301,7 +301,7 @@ def parseChorusRIBTable(file): #The ROM info starts here.
             quit()
         return deviceStartAddress, ribTable
 
-def parseRIB(file, deviceStartAddress, ribTable): #Using the information obtained from parseRIBTable, parse the RIB. I don't know what RIB stands for yet, so don't ask what it means.
+def parseRIB(file, deviceStartAddress, ribTable): #Using the information obtained from parseChorusRIBTable, parse the RIB (resource information block)
     with open(file, "rb") as rom:
         rom.seek(ribTable-deviceStartAddress)
         signature = rom.read(4).decode("UTF-8")
