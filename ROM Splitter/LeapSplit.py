@@ -330,19 +330,59 @@ def parseRIB(file, deviceStartAddress, ribTable): #Using the information obtaine
                     case 0x1003: #Product info group
                         groupName = "Product info"
                         parseProductInfo(file, deviceStartAddress, groupOffset, groupCount)
-                    case 0x1005: #"Group"
-                        groupName = "'Group' (1) group"
+                    case 0x1004: #Audio
+                        groupName = "Audio"
+                    case 0x1005: #Storage
+                        groupName = "Storage"
                     case 0x1006: #Asset group
                         groupName = "Asset table"
                         parseAssetTable(file, deviceStartAddress, groupOffset, groupCount)
+                    case 0x1007: #Debug
+                        groupName = "Debug"
+                    case 0x1008: #UI
+                        groupName = "UI"
                     case 0x1009: #Leapster System Apps
                         groupName = "System App Table"
+                    case 0x100A: #Tasks
+                        groupName = "Task"
+                    case 0x100B: #SysMgr
+                        groupName = "System manager"
                     case 0x100C: #Leapster Datasets
                         groupName = "Leapster Datasets"
                     case 0x100D: #C-Style Datasets
                         groupName = "C-Style Datasets"
+                    case 0x100E: #XY provider / proc?
+                        groupName = "XY"
+                    case 0x100F: #Lookup tables
+                        groupName = "Math lookup table"
+                    case 0x1010: #Speech engine
+                        groupName = "Speech"
+                    case 0x1011: #HwrVORsrcCodeModule?
+                        groupName = "VOR"
+                    case 0x1012: #TV resource
+                        groupName = "TV config"
+                    case 0x1013: #USB
+                        groupName = "USB"
+                    case 0x1014: #Locale
+                        groupName = "Locale"
+                    case 0x1015: #Kernel config
+                        groupName = "Kernel configuration"
+                    case 0x1016: #Recorder handle table
+                        groupName = "Recorder handle table"
+                    case 0x1017: #Memory list
+                        groupName = "Memory list"
+                    case 0x1018: #DVD
+                        groupName = "DVD remote"
+                    case 0x1019: #Draw
+                        groupName = "Draw"
                     case 0x2000: #Leapster Apps
                         groupName = "Leapster Apps"
+                    case 0x2001: #StartupShutdown
+                        groupName = "Startup and shutdown"
+                    case 0x2002: #Compat
+                        groupName = "System compatibility"
+                    case 0x2003: #Product rsrc?
+                        groupName = "Product hardware"
                     case 0x3001: #"Group"
                         groupName = "'Group' (2) group"
                     case _:
@@ -351,7 +391,7 @@ def parseRIB(file, deviceStartAddress, ribTable): #Using the information obtaine
                 if not unknownGroup:
                     print(f"Group {groupName} at {hex(groupOffset)} ({groupCount} resources)")
                 else:
-                    print(f"Unknown group with ID {hex(RIB_Group_ID)} at {hex(groupOffset)} ({groupCount} resources)")
+                    print(f"Unknown group with ID {hex(RIB_Group_ID)} at {hex(groupOffset)} (Resource count: {groupCount})")
                     
 def parseProductInfo(file, deviceStartAddress, productInfoOffset, productInfoCount):
     with open(f"{paths[0]}Product info.txt", "w+") as ProductInfo:
