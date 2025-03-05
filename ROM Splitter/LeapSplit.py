@@ -317,65 +317,41 @@ def parseRIB(file, deviceStartAddress, ribTable): #Using the information obtaine
             reserved5 = rom.read(4)
             for resource in range(resourceGroupCount):
                 RIB_Group_ID = struct.unpack("<H", rom.read(2))[0]
-                #print(hex(rom.tell()), hex(RIB_Group_ID))
+                groupCount = struct.unpack("<H", rom.read(2))[0]
+                groupOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
+                unknownGroup = False
 
-                if RIB_Group_ID == 0x1000: #Boot
-                    bootCount = struct.unpack("<H", rom.read(2))[0]
-                    bootOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"Boot at {hex(bootOffset)}")
-                    
-                elif RIB_Group_ID == 0x1001: #Modules
-                    moduleCount = struct.unpack("<H", rom.read(2))[0]
-                    moduleOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"Modules at {hex(moduleOffset)}")
-                    parseModuleTable(file, moduleOffset, deviceStartAddress, paths)
-                    
-                elif RIB_Group_ID == 0x1003: #Product info group
-                    productInfoCount = struct.unpack("<H", rom.read(2))[0]
-                    productInfoOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"Product info at {hex(productInfoOffset)}")
-                    parseProductInfo(file, deviceStartAddress, productInfoOffset, productInfoCount)
-                    
-                elif RIB_Group_ID == 0x1005: #"Group"
-                    groupCount = struct.unpack("<H", rom.read(2))[0]
-                    groupOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"'Group' (1) group at {hex(groupOffset)}")
-                    
-                elif RIB_Group_ID == 0x1006: #Asset group
-                    assetTableCount = struct.unpack("<H", rom.read(2))[0]
-                    assetTableOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"Asset table at {hex(assetTableOffset)}")
-                    parseAssetTable(file, deviceStartAddress, assetTableOffset, assetTableCount)
+                match RIB_Group_ID:
+                    case 0x1000: #Boot
+                        groupName = "Boot"
+                    case 0x1001: #Modules
+                        groupName = "Modules"
+                        parseModuleTable(file, groupOffset, deviceStartAddress, paths)
+                    case 0x1003: #Product info group
+                        groupName = "Product info"
+                        parseProductInfo(file, deviceStartAddress, groupOffset, groupCount)
+                    case 0x1005: #"Group"
+                        groupName = "'Group' (1) group"
+                    case 0x1006: #Asset group
+                        groupName = "Asset table"
+                        parseAssetTable(file, deviceStartAddress, groupOffset, groupCount)
+                    case 0x1009: #Leapster System Apps
+                        groupName = "System App Table"
+                    case 0x100C: #Leapster Datasets
+                        groupName = "Leapster Datasets"
+                    case 0x100D: #C-Style Datasets
+                        groupName = "C-Style Datasets"
+                    case 0x2000: #Leapster Apps
+                        groupName = "Leapster Apps"
+                    case 0x3001: #"Group"
+                        groupName = "'Group' (2) group"
+                    case _:
+                        unknownGroup = True
 
-                elif RIB_Group_ID == 0x1009: #Leapster System Apps
-                    systemAppCount = struct.unpack("<H", rom.read(2))[0]
-                    systemAppOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"System App Table at {hex(systemAppOffset)}")
-                    
-                elif RIB_Group_ID == 0x100C: #Leapster Datasets
-                    datasetCount = struct.unpack("<H", rom.read(2))[0]
-                    datasetOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"Leapster Datasets at {hex(datasetOffset)}")
-
-                elif RIB_Group_ID == 0x100D: #C-Style Datasets
-                    cDatasetCount = struct.unpack("<H", rom.read(2))[0]
-                    cDatasetOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"C-Style Datasets at {hex(cDatasetOffset)}")
-                    
-                elif RIB_Group_ID == 0x2000: #Leapster Apps
-                    appCount = struct.unpack("<H", rom.read(2))[0]
-                    appOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"Leapster Apps at {hex(appOffset)}")
-
-                elif RIB_Group_ID == 0x3001: #"Group"
-                    groupCount = struct.unpack("<H", rom.read(2))[0]
-                    groupOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
-                    print(f"'Group' (2) group at {hex(groupOffset)}")
-
-                else: #Unknown group
-                    print(f"This group ({hex(RIB_Group_ID)}) is undocumented and as a result, completely unknown.")
-                    unknownCount = struct.unpack("<H", rom.read(2))[0]
-                    unknownOffset = struct.unpack("<I", rom.read(4))[0]-deviceStartAddress
+                if not unknownGroup:
+                    print(f"Group {groupName} at {hex(groupOffset)} ({groupCount} resources)")
+                else:
+                    print(f"Unknown group with ID {hex(RIB_Group_ID)} at {hex(groupOffset)} ({groupCount} resources)")
                     
 def parseProductInfo(file, deviceStartAddress, productInfoOffset, productInfoCount):
     with open(f"{paths[0]}Product info.txt", "w+") as ProductInfo:
