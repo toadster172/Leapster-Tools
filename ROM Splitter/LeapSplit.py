@@ -223,7 +223,7 @@ def parseGasTable(file, offset, deviceStartAddress): #Parse the GAS table
         for pointer in range(int(gas_count)): #Get the offsets of the GAS files
             gas_offset = struct.unpack("<I",rom.read(4))[0]-deviceStartAddress
             GAS = getGAS(file, gas_offset)
-            with open(f"{paths[1]}GAS_{pointer+initialHandleValue}.bin", "w+b") as gas:
+            with open(f"{paths[1]}GAS_{pointer+initialHandleValue:04X}.bin", "w+b") as gas:
                 gas.write(GAS)
                 
 def parseLpcTable(file, offset, deviceStartAddress): #Parse the LPC table
@@ -235,7 +235,7 @@ def parseLpcTable(file, offset, deviceStartAddress): #Parse the LPC table
         for pointer in range(int(lpc_count)): #Get the offsets of the LPC files
             lpc_offset = struct.unpack("<I",rom.read(4))[0]-deviceStartAddress
             LPC, compressionLevel = getLPC(file, lpc_offset, deviceStartAddress)
-            with open(f"{paths[3]}{cmode[compressionLevel]}_LPC_{pointer+initialHandleValue}.bin", "w+b") as lpc:
+            with open(f"{paths[3]}{cmode[compressionLevel]}_LPC_{pointer+initialHandleValue:04X}.bin", "w+b") as lpc:
                 lpc.write(LPC)
                 
 def parseSynTable(file, offset, deviceStartAddress): #Parse the SYN table
@@ -246,12 +246,12 @@ def parseSynTable(file, offset, deviceStartAddress): #Parse the SYN table
         for pointer in range(int(syn_count)): #Get the offsets of the SYN files
             syn_offset = struct.unpack("<I",rom.read(4))[0]-deviceStartAddress
             SYN = getSYN(file, syn_offset, deviceStartAddress)
-            with open(f"{paths[5]}SYN_{pointer+initialHandleValue}.bin", "w+b") as syn:
+            with open(f"{paths[5]}SYN_{pointer+initialHandleValue:04X}.bin", "w+b") as syn:
                 syn.write(SYN)
             try:
                 loadedLoopCount = parseSettings(settingsPath, "loops")
                 pitchBendStrength = parseSettings(settingsPath, "pitchBendStrength")
-                convertSYN(f"{paths[5]}SYN_{pointer+initialHandleValue}.bin", convertedPaths[2], loadedLoopCount, pitchBendStrength)
+                convertSYN(f"{paths[5]}SYN_{pointer+initialHandleValue:04X}.bin", convertedPaths[2], loadedLoopCount, pitchBendStrength)
             except: #This should never happen due to all of the commands being implemented. The script should be thoroughly tested without this try/except block to confirm this.
                 "SYN file failed to convert because the script reached the end of the file early"
 
@@ -263,7 +263,7 @@ def parseSwfTable(file, offset, deviceStartAddress): #Parse the SWF table
         for pointer in range(int(swf_count)): #Get the offsets of the SWF files
             swf_offset = struct.unpack("<I",rom.read(4))[0]-deviceStartAddress
             SWF = getSWF(file, swf_offset, deviceStartAddress)
-            with open(f"{paths[7]}{pointer+initialHandleValue}.swf", "w+b") as swf:
+            with open(f"{paths[7]}{pointer+initialHandleValue:08X}.swf", "w+b") as swf:
                 swf.write(SWF)
 
 def parsePegBitmapTable(file, offset, deviceStartAddress): #Parse the PEG Bitmap table (PEG seems to be LeapFrog's 2D engine)
